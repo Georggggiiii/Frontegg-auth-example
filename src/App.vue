@@ -1,30 +1,65 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div id="app" v-if="fronteggLoaded">
+    <div v-if="authState.user">
+      <span>Logged in as: {{ authState.user.name }}</span>
+    </div>
+    <button @click="showAdminPortal" v-if="authState.user">Open admin portal</button>
+    <div>
+      <button v-if="authState.user" @click="showAccessToken">What is my access token?</button><br>
+      <button v-if="authState.user" @click="logout">Log out</button>
+      <button v-if="!authState.user" @click="loginWithRedirect">Click to Login</button>
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<script>
+import { mapLoginActions, ContextHolder } from "@frontegg/vue";
+import { AdminPortal } from "@frontegg/vue";
+
+export default {
+  name: "App",
+  methods: {
+    loginWithRedirect: mapLoginActions("loginWithRedirect"),
+    showAccessToken() {
+      alert(this.authState.user.accessToken);
+    },
+    logout() {
+      const baseUrl = ContextHolder.getContext().baseUrl;
+      window.location.href = `${baseUrl}/oauth/logout?post_logout_redirect_uri=${window.location}`;
+      window.localStorage.removeItem("user");
+    },
+    showAdminPortal() {
+      AdminPortal.show();
+    },
+  },
+  data() {
+    return {
+      ...this.mapAuthState(),
+    };
+  },
+  created() {
+    const storedUser = window.localStorage.getItem("user");
+    if (storedUser) {
+      this.authState.user = JSON.parse(storedUser);
+    }
+  },
+  beforeUpdate() {
+    window.localStorage.setItem("user", JSON.stringify(this.authState.user));
+  },
+};
+</script>
+
+
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: white;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+body {
+  background-color: #2c3e50;
 }
 </style>
