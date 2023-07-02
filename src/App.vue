@@ -1,13 +1,14 @@
 <template>
   <div id="app" v-if="fronteggLoaded">
     <div v-if="authState.user">
-      <span>Logged in as: {{ authState.user.name }}</span>
+      <span> {{ authState.user.name }}</span><br>
+      <img :src="authState.user.profilePictureUrl" alt="">
     </div>
     <button @click="showAdminPortal" v-if="authState.user">Open admin portal</button>
     <div>
       <button v-if="authState.user" @click="showAccessToken">What is my access token?</button><br>
       <button v-if="authState.user" @click="logout">Log out</button>
-      <button v-if="!authState.user" @click="loginWithRedirect">Click to Login</button>
+      <button v-if="!authState.user" @click="loginWithRedirect">Login</button>
     </div>
   </div>
 </template>
@@ -42,6 +43,7 @@ export default {
     if (storedUser) {
       this.authState.user = JSON.parse(storedUser);
     }
+    console.log(this.authState.user)
   },
   beforeUpdate() {
     window.localStorage.setItem("user", JSON.stringify(this.authState.user));
@@ -61,5 +63,9 @@ export default {
 }
 body {
   background-color: #2c3e50;
+}
+img {
+  width:150px;
+  border-radius:50%;
 }
 </style>
